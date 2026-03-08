@@ -104,6 +104,16 @@
   border-color: #667eea;
 }
 
+.agent-card.archived {
+  opacity: 0.65;
+  background: #f9f9f9;
+}
+
+.agent-card.archived:hover {
+  opacity: 0.85;
+  border-color: #ffb347;
+}
+
 .agent-card-header {
   display: flex;
   justify-content: space-between;
@@ -113,18 +123,37 @@
 }
 
 .agent-card h3 {
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: #2d3436;
   flex: 1;
+  word-break: break-word;
+}
+
+.agent-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .agent-type-badge {
   display: inline-block;
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.75em;
+  font-size: 0.7em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.archived-badge {
+  display: inline-block;
+  background: #ffeaa7;
+  color: #d63031;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7em;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -133,7 +162,9 @@
   color: #667eea;
   font-weight: 600;
   margin-bottom: 12px;
-  font-size: 0.95em;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .agent-meta {
@@ -141,23 +172,26 @@
   padding-top: 12px;
   border-top: 1px solid #e9ecef;
   font-size: 0.85em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.meta-label {
-  color: #999;
-  font-weight: 600;
-}
-
-.agent-meta code {
-  display: block;
-  background: #f5f6fa;
-  padding: 6px 8px;
-  border-radius: 4px;
+.model-tag {
+  display: inline-block;
+  background: #f0f4ff;
   color: #667eea;
-  font-size: 0.8em;
-  margin-top: 4px;
-  font-family: 'Monaco', 'Courier New', monospace;
-  overflow-x: auto;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  font-family: 'Monaco', monospace;
+}
+
+.status-indicator {
+  color: #00b894;
+  font-size: 1.2em;
+  margin-left: auto;
 }
 
 .dashboard-loading {
