@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samurai Framework - Interactive System of Work</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; padding: 20px; }
+
+        /* HEADER */
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .header h1 { font-size: 2.4em; color: #667eea; margin-bottom: 8px; }
+        .header .subtitle { font-size: 1.05em; color: #666; margin-bottom: 20px; }
+        .header .meta { font-size: 0.9em; color: #999; margin-bottom: 20px; }
+        .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 20px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 600; font-size: 0.9em;
+            transition: all 0.25s ease;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
+        .btn-secondary { background: #f0f4ff; color: #667eea; border: 2px solid #667eea; }
+        .btn-secondary:hover { background: #667eea; color: white; }
+        .btn-danger { background: #fef2f2; color: #ef4444; border: 2px solid #ef4444; }
+        .btn-danger:hover { background: #ef4444; color: white; }
+
+        /* INFO BANNER */
+        .info-banner {
+            background: #f0f9ff; border-left: 4px solid #3b82f6;
+            padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+        .info-banner strong { color: #1e40af; }
+
+        /* LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr 280px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: white; border-radius: 12px; padding: 20px;
+            height: fit-content; position: sticky; top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .sidebar h3 { color: #667eea; margin-bottom: 15px; font-size: 1.05em; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { margin-bottom: 4px; }
+        .sidebar-menu a {
+            display: block; padding: 8px 12px; color: #444;
+            text-decoration: none; border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: all 0.25s ease; font-size: 0.9em;
+        }
+        .sidebar-menu a:hover { background: #f0f4ff; border-left-color: #667eea; color: #667eea; }
+        .sidebar-menu .nav-group { font-size: 0.75em; font-weight: 700; color: #999;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            padding: 10px 12px 4px; margin-top: 8px; }
+
+        /* CONTENT */
+        .content {
+            background: white; border-radius: 12px; padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* COMMENTS PANEL */
+        .comments-panel {
+            background: white; border-radius: 12px; padding: 20px;
+            height: fit-content; position: sticky; top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .comments-panel h3 { color: #667eea; margin-bottom: 15px; font-size: 1.05em;
+            border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .comment-count {
+            background: #667eea; color: white; padding: 3px 8px;
+            border-radius: 12px; font-size: 0.8em; font-weight: 700;
+        }
+        .comment-item {
+            background: #f8f9fa; border-left: 4px solid #667eea;
+            padding: 10px 12px; margin-bottom: 10px; border-radius: 6px; font-size: 0.85em;
+        }
+        .comment-item.p0 { border-left-color: #ef4444; background: #fef2f2; }
+        .comment-item.p1 { border-left-color: #f59e0b; background: #fffbf0; }
+        .comment-item.p2 { border-left-color: #10b981; background: #f0fdf4; }
+        .comment-item.p3 { border-left-color: #6b7280; background: #f9fafb; }
+        .comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .comment-section { font-weight: 700; color: #667eea; font-size: 0.8em; }
+        .comment-priority { font-weight: 700; font-size: 0.75em; padding: 2px 6px; border-radius: 3px; background: white; }
+        .comment-text { color: #333; margin-bottom: 6px; }
+        .comment-timestamp { font-size: 0.78em; color: #999; }
+        .comment-delete { background: none; border: none; cursor: pointer;
+            color: #ccc; font-size: 0.9em; float: right; padding: 0 0 0 6px; }
+        .comment-delete:hover { color: #ef4444; }
+
+        /* SECTIONS */
+        .section { margin-bottom: 55px; scroll-margin-top: 20px; }
+        .section-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .section-title { font-size: 1.9em; color: #667eea; padding-bottom: 8px;
+            border-bottom: 3px solid #667eea; flex: 1; }
+        .comment-button {
+            background: #667eea; color: white; border: none;
+            padding: 7px 12px; border-radius: 6px; cursor: pointer;
+            font-weight: 600; font-size: 0.82em; transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .comment-button:hover { background: #5568d3; }
+        .comment-button.has-comments { background: #f59e0b; }
+
+        .subsection { margin-bottom: 28px; }
+        .subsection-title { font-size: 1.3em; color: #764ba2; margin-bottom: 12px; margin-top: 20px; }
+
+        /* CARDS */
+        .card {
+            background: #f8f9fa; border-radius: 8px; padding: 18px;
+            margin-bottom: 14px; border-left: 4px solid #667eea;
+        }
+        .card h4 { color: #333; margin-bottom: 8px; font-size: 1.05em; }
+        .card p { color: #555; margin-bottom: 6px; font-size: 0.92em; }
+        .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+        .card-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+
+        /* INLINE COMMENT BOX */
+        .inline-comment-box {
+            background: #fff3cd; border: 2px solid #ffc107;
+            border-radius: 6px; padding: 14px; margin: 14px 0; display: none;
+        }
+        .inline-comment-box.active { display: block; }
+        .inline-comment-box textarea {
+            width: 100%; padding: 10px; border: 1px solid #ffc107;
+            border-radius: 4px; font-family: inherit; font-size: 0.92em;
+            min-height: 75px; margin-bottom: 10px; resize: vertical;
+        }
+        .inline-comment-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+        .comment-input-priority {
+            padding: 6px 10px; border: 1px solid #ffc107;
+            border-radius: 4px; font-size: 0.88em;
+        }
+        .inline-comment-box button {
+            padding: 7px 14px; border: none; border-radius: 4px;
+            cursor: pointer; font-weight: 600; font-size: 0.88em;
+        }
+        .btn-submit-comment { background: #10b981; color: white; }
+        .btn-submit-comment:hover { background: #059669; }
+        .btn-cancel-comment { background: #e5e7eb; color: #333; }
+        .btn-cancel-comment:hover { background: #d1d5db; }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92em; }
+        table th { background: #667eea; color: white; padding: 11px 12px; text-align: left; }
+        table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        table tr:hover td { background: #f8f9fa; }
+        table tr:nth-child(even) td { background: #fafafa; }
+        table tr:nth-child(even):hover td { background: #f0f4ff; }
+
+        /* BADGES */
+        .badge {
+            display: inline-block; padding: 3px 9px; border-radius: 12px;
+            font-size: 0.78em; font-weight: 700; white-space: nowrap;
+        }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-orange { background: #fef3c7; color: #92400e; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-purple { background: #ede9fe; color: #5b21b6; }
+        .badge-gray { background: #f3f4f6; color: #374151; }
+        .badge-teal { background: #ccfbf1; color: #134e4a; }
+        .badge-frozen { background: #1e293b; color: #e2e8f0; }
+
+        /* STATUS BADGES (emoji-style) */
+        .status-active { color: #065f46; font-weight: 700; }
+        .status-early { color: #92400e; font-weight: 700; }
+        .status-placeholder { color: #991b1b; font-weight: 700; }
+        .status-frozen { color: #5b21b6; font-weight: 700; }
+
+        /* MATRIX */
+        .matrix-container {
+            overflow-x: auto; border: 1px solid #e5e7eb;
+            border-radius: 8px; margin: 16px 0;
+        }
+        .matrix-table { min-width: 1100px; border-collapse: collapse; font-size: 0.75em; }
+        .matrix-table th, .matrix-table td { border: 1px solid #e5e7eb; }
+        .matrix-table thead th {
+            background: #667eea; color: white; padding: 8px 5px;
+            text-align: center; font-size: 0.78em; writing-mode: vertical-rl;
+            transform: rotate(180deg); height: 120px; white-space: nowrap;
+            vertical-align: bottom; cursor: pointer; transition: background 0.2s;
+        }
+        .matrix-table thead th:hover { background: #5568d3; }
+        .matrix-table thead th:first-child { writing-mode: horizontal-tb;
+            transform: none; height: auto; text-align: left; width: 170px;
+            padding: 8px 10px; cursor: default; font-size: 0.82em; }
+        .matrix-table .agent-name-cell {
+            padding: 5px 8px; font-size: 0.82em; font-weight: 600;
+            white-space: nowrap; cursor: pointer; background: #f8f9fa;
+            border-right: 2px solid #667eea;
+        }
+        .matrix-table .agent-name-cell:hover { background: #ede9fe; color: #5b21b6; }
+        .matrix-table .group-header {
+            background: #764ba2; color: white; font-weight: 700;
+            font-size: 0.8em; text-transform: uppercase;
+            letter-spacing: 0.05em; padding: 5px 10px;
+        }
+        .matrix-table td.cell {
+            text-align: center; padding: 3px; cursor: default;
+        }
+        .cell-dot {
+            display: inline-block; width: 16px; height: 16px;
+            border-radius: 50%; border: 2px solid transparent;
+        }
+        .cell-present { background: #10b981; border-color: #059669; }
+        .cell-variant { background: #f59e0b; border-color: #d97706; }
+        .cell-missing { background: #fee2e2; border-color: #fca5a5; }
+        .cell-domain { background: #3b82f6; border-color: #2563eb; }
+        .cell-na { background: #f3f4f6; border-color: #d1d5db; }
+
+        .matrix-legend {
+            display: flex; gap: 20px; flex-wrap: wrap;
+            padding: 12px 16px; background: #f8f9fa;
+            border-top: 1px solid #e5e7eb; font-size: 0.82em;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+
+        /* MATRIX DETAIL PANEL */
+        .matrix-detail {
+            background: #f0f4ff; border: 2px solid #667eea;
+            border-radius: 8px; padding: 16px; margin-top: 12px;
+            display: none;
+        }
+        .matrix-detail.active { display: block; }
+        .matrix-detail h4 { color: #667eea; margin-bottom: 10px; }
+        .matrix-detail-list { list-style: none; }
+        .matrix-detail-list li { padding: 4px 0; font-size: 0.9em; border-bottom: 1px solid #dbeafe; }
+
+        /* CODE EXAMPLES */
+        .code-block {
+            background: #1e293b; color: #e2e8f0;
+            padding: 16px; border-radius: 8px; margin: 12px 0;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 0.82em; overflow-x: auto; line-height: 1.7;
+        }
+        .code-bad { background: #1c0a0a; border-left: 4px solid #ef4444; }
+        .code-good { background: #0a1c10; border-left: 4px solid #10b981; }
+        .code-label {
+            display: inline-block; padding: 3px 10px; border-radius: 4px;
+            font-size: 0.78em; font-weight: 700; margin-bottom: 6px;
+        }
+        .code-label-bad { background: #fee2e2; color: #991b1b; }
+        .code-label-good { background: #d1fae5; color: #065f46; }
+        .code-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+
+        /* TIMELINE */
+        .timeline { margin: 16px 0; }
+        .timeline-item { display: flex; gap: 14px; margin-bottom: 16px; }
+        .timeline-dot {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #667eea; color: white; display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.82em; flex-shrink: 0; margin-top: 4px;
+        }
+        .timeline-content h5 { color: #333; margin-bottom: 4px; }
+        .timeline-content p { font-size: 0.88em; color: #666; }
+
+        /* MODAL */
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+        }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 12px;
+            width: 92%; max-width: 750px; max-height: 82vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        .modal-content h2 { color: #667eea; margin-bottom: 16px; }
+        .raw-comments {
+            background: #1e293b; color: #e2e8f0; padding: 14px;
+            border-radius: 6px; font-family: 'Courier New', monospace;
+            font-size: 0.82em; white-space: pre-wrap; word-break: break-all;
+            max-height: 380px; overflow-y: auto;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: white; border-radius: 12px; padding: 20px;
+            text-align: center; color: #666; margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* ENFORCEMENT DIAGRAM */
+        .enforcement-flow {
+            background: #f0f4ff; border: 2px solid #667eea;
+            border-radius: 8px; padding: 20px; margin: 16px 0;
+        }
+        .flow-step {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid #dbeafe; font-size: 0.9em;
+        }
+        .flow-step:last-child { border-bottom: none; }
+        .flow-arrow { color: #667eea; font-weight: 700; font-size: 1.1em; }
+        .flow-pass { color: #10b981; font-weight: 700; }
+        .flow-fail { color: #ef4444; font-weight: 700; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1300px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .sidebar, .comments-panel { position: static; }
+            .card-grid { grid-template-columns: 1fr 1fr; }
+            .code-pair { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .card-grid, .card-grid-2 { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.7em; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>Samurai Framework &mdash; Interactive System of Work</h1>
+        <p class="subtitle">Complete Portfolio Documentation &middot; AI Agent Governance &middot; Code Standards &middot; Infrastructure</p>
+        <p class="meta">Last rebuilt: 2026-03-03 (Phase 3) &middot; 14 projects &middot; 170+ agents &middot; 5 infrastructure platforms &middot; 5 frozen baselines</p>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="scrollToTop()">Top</button>
+            <button class="btn btn-secondary" onclick="showAllComments()">View All Comments</button>
+            <button class="btn btn-secondary" onclick="exportComments()">Export Comments</button>
+            <button class="btn btn-danger" onclick="clearAllComments()">Clear All</button>
+        </div>
+    </div>
+
+    <div class="info-banner">
+        <strong>How to Use:</strong> Click "Add Comment" next to any section to annotate the document. Comments persist in your browser's local storage. Click "View All Comments" to export everything for review. Click agent names or project headers in the matrix for drill-down details.
+    </div>
+
+    <div class="main-layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <h3>Navigation</h3>
+            <ul class="sidebar-menu">
+                <div class="nav-group">Overview</div>
+                <li><a href="#overview">System Overview</a></li>
+
+                <div class="nav-group">Portfolio</div>
+                <li><a href="#projects">Projects (14)</a></li>
+                <li><a href="#matrix">Agent-Project Matrix</a></li>
+
+                <div class="nav-group">Infrastructure</div>
+                <li><a href="#infrastructure">Platforms (5)</a></li>
+
+                <div class="nav-group">Process</div>
+                <li><a href="#workflow">Workflow &amp; Gates</a></li>
+                <li><a href="#agents">Agent System</a></li>
+                <li><a href="#code-protocol">Code Writing Protocol</a></li>
+
+                <div class="nav-group">Governance</div>
+                <li><a href="#governance">Baselines &amp; Governance</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#concepts">Key Concepts</a></li>
+            </ul>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+
+            <!-- SYSTEM OVERVIEW -->
+            <div class="section" id="overview">
+                <div class="section-header">
+                    <h2 class="section-title">System Overview</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('overview')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-overview">
+                    <textarea id="textarea-overview" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-overview">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('overview')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('overview')">Cancel</button>
+                    </div>
+                </div>
+
+                <p style="font-size:1.05em;color:#555;margin-bottom:20px;">
+                    You operate a <strong>world-class, AI-assisted software development operation</strong> spanning
+                    14 interconnected projects across 5 infrastructure platforms, with 170+ specialized agents
+                    deployed and 150+ governance rules enforced.
+                </p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>14 Projects in Portfolio</h4>
+                        <p>1 Canonical platform (Samurai Framework), 9 active development projects, 4 placeholder/early-concept sites. All governed by the agent system.</p>
+                    </div>
+                    <div class="card">
+                        <h4>170+ AI Agents</h4>
+                        <p>12 core agents deployed in every active project, 150+ domain-specific agents across projects. Approximately 15-28 agents per project.</p>
+                    </div>
+                    <div class="card">
+                        <h4>5 Infrastructure Platforms</h4>
+                        <p>Local by Flywheel (dev), SiteGround (WP hosting), Vercel (Next.js), Supabase (PostgreSQL), Azure (cloud services + Alexa).</p>
+                    </div>
+                    <div class="card">
+                        <h4>5 Frozen Baselines</h4>
+                        <p>Core Services (2026-01-30), Kanban v1.0 (2026-02-03), Email Intelligence v1.2 (2026-02-18), MYOB v1.0 (2026-02-05), CRM v1.0 (2026-03-02).</p>
+                    </div>
+                    <div class="card">
+                        <h4>Process Gates</h4>
+                        <p>Architecture review, Schultz governance check, QA verification, and security audit before anything ships. No skipping any gate.</p>
+                    </div>
+                    <div class="card">
+                        <h4>5 Critical Gaps</h4>
+                        <p>Code writing protocol (defined here, rollout pending), agent naming inconsistency (3 projects), baseline freeze not extended to all projects, devops bottleneck, scattered docs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECTS PORTFOLIO (14 PROJECTS) -->
+            <div class="section" id="projects">
+                <div class="section-header">
+                    <h2 class="section-title">Projects Portfolio &mdash; 14 Projects</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('projects')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-projects">
+                    <textarea id="textarea-projects" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-projects">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('projects')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('projects')">Cancel</button>
+                    </div>
+                </div>
+
+                <p style="margin-bottom:12px;color:#555;">14 projects classified by type and deployment status. Status legend: <span class="badge badge-green">Active</span> <span class="badge badge-orange">Early Dev</span> <span class="badge badge-red">Placeholder</span> <span class="badge badge-frozen">FROZEN Baseline</span></p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project Name</th>
+                            <th>Purpose</th>
+                            <th>Type</th>
+                            <th>Tech Stack</th>
+                            <th>Hosting</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><strong>Samurai Framework</strong></td>
+                            <td>Multi-tenant campaign execution platform. WordPress plugin coordinating deliverables across staff, clients, suppliers and designers. Evolving into a visual CRM for promotional products. 5 frozen baselines protecting core services.</td>
+                            <td><span class="badge badge-purple">Canonical Platform</span></td>
+                            <td>WordPress + Custom Plugin + Divi Child + ACF + Ultimate Member</td>
+                            <td>SiteGround, Local</td>
+                            <td><span class="badge badge-green">Active &mdash; Production</span> <span class="badge badge-frozen">5 FROZEN Baselines</span></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><strong>Family Orchestrator</strong> <small style="color:#999;">(Alexa)</small></td>
+                            <td>Family coordination platform with Alexa voice integration. Smart home orchestration, household task automation, presence detection, shared family dashboards and voice-commanded workflows.</td>
+                            <td><span class="badge badge-blue">SaaS + Voice</span></td>
+                            <td>Next.js + React 19 + Supabase + Node.js + Alexa Skills Kit + AWS Lambda</td>
+                            <td>Vercel, Supabase, AWS Lambda, Local</td>
+                            <td><span class="badge badge-green">Active &mdash; Production</span></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><strong>My Wine Mojo</strong></td>
+                            <td>Experience-first wine discovery PWA. WordPress REST API backend with Next.js 15 PWA frontend. 7 Families of Experience taxonomy for personalised wine matching. Party MVP in development.</td>
+                            <td><span class="badge badge-blue">Consumer PWA + SaaS</span></td>
+                            <td>WordPress API + Next.js 15 + React 19 + TypeScript + Supabase</td>
+                            <td>SiteGround, Vercel, Supabase, Local</td>
+                            <td><span class="badge badge-green">Active &mdash; Production</span></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><strong>Plato AI Tutor</strong></td>
+                            <td>AI-powered personalised tutoring platform using Socratic teaching methodology. Adaptive learning paths, subject mastery tracking and interactive problem-solving for students.</td>
+                            <td><span class="badge badge-blue">Education SaaS + PWA</span></td>
+                            <td>WordPress API + Next.js 15 + React 19 + TypeScript + AI APIs</td>
+                            <td>SiteGround, Vercel, Local</td>
+                            <td><span class="badge badge-green">Active &mdash; Production</span></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><strong>Australian Cocoa</strong></td>
+                            <td>WordPress content and marketing site on Divi 5.0 beta. Full SEO, email marketing, HubSpot CRM and analytics integrations. E-commerce or lead conversion phase next.</td>
+                            <td><span class="badge badge-blue">WordPress Site</span></td>
+                            <td>WordPress 6.9 + Divi 5.0 (beta) + HubSpot + Yoast + Bloom</td>
+                            <td>SiteGround, Local</td>
+                            <td><span class="badge badge-green">Active</span> <span class="badge badge-orange">⚠ DIVI BETA</span></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td><strong>Sonic Compass</strong></td>
+                            <td>Audio equipment discovery platform. Matches listeners with gear based on listening style, room acoustics and personal preferences. V2 (Sensory Compass) architecture rebuild underway. Tool Registry pattern created here.</td>
+                            <td><span class="badge badge-blue">Consumer Web App</span></td>
+                            <td>WordPress + Divi + Tool Registry + React + Supabase</td>
+                            <td>SiteGround, Supabase, Local</td>
+                            <td><span class="badge badge-green">Active</span> <span class="badge badge-orange">Migration in progress</span></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td><strong>The Kendo Way</strong></td>
+                            <td>Performance management SaaS platform. HR strategy, talent development, board governance and people analytics for organisations. WP + Divi + PWA governance app + Azure integration.</td>
+                            <td><span class="badge badge-blue">SaaS Platform</span></td>
+                            <td>WordPress + Divi + PWA + Azure + PHP</td>
+                            <td>SiteGround, Azure, Local</td>
+                            <td><span class="badge badge-green">Active &mdash; Production</span></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td><strong>Mojo Microsoft AI</strong></td>
+                            <td>M365 Copilot control plane and AI readiness consulting platform. Assessment wizard, interactive mapper and scoring engine integrated with the Microsoft ecosystem. Azure Functions deployment pending.</td>
+                            <td><span class="badge badge-blue">Enterprise SaaS (early)</span></td>
+                            <td>WordPress 6.9 + Divi + Azure Functions + Microsoft 365</td>
+                            <td>SiteGround, Azure, Local</td>
+                            <td><span class="badge badge-orange">Early Development</span></td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td><strong>Pacific Merchandising</strong></td>
+                            <td>WordPress client portal for merchandise project management. Kanban board, brand guidelines and client dashboard for union and mining clients. Will migrate to Samurai Framework. ACF + Divi 5.0 beta.</td>
+                            <td><span class="badge badge-blue">Client Portal</span></td>
+                            <td>WordPress 6.9 + Divi 5.0 (beta) + ACF + Ultimate Member + PHP</td>
+                            <td>SiteGround, Local</td>
+                            <td><span class="badge badge-green">Active</span> <span class="badge badge-orange">⚠ DIVI BETA</span></td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td><strong>WMG Africa</strong> <small style="color:#999;">(William Gold Associates)</small></td>
+                            <td>Corporate website and membership platform for WMG consulting practice. WordPress Multisite, Divi + Elementor mix, membership management and portfolio showcase. Content consolidation underway.</td>
+                            <td><span class="badge badge-teal">Corporate + Membership</span></td>
+                            <td>WordPress 6.9 + Divi + Elementor + Ultimate Member + Multisite</td>
+                            <td>SiteGround, Local</td>
+                            <td><span class="badge badge-orange">Active</span> <span class="badge badge-orange">⚠ MULTISITE</span></td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td><strong>iTrust Invest v2</strong></td>
+                            <td>Finance platform rebuild. Next iteration of an investment trust platform. Early concept stage. No agent system deployed. Architecture undecided. WordPress shell with Elementor.</td>
+                            <td><span class="badge badge-gray">WordPress Shell</span></td>
+                            <td>WordPress 6.7.2 + Elementor + default themes</td>
+                            <td>Unknown</td>
+                            <td><span class="badge badge-red">Pre-Development</span></td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td><strong>Plato AI</strong> <small style="color:#999;">(variant)</small></td>
+                            <td>AI Plato variant placeholder. Empty shell directory. Abandoned — superseded by Plato AI Tutor (row 4). No project content or agent system deployed.</td>
+                            <td><span class="badge badge-gray">Placeholder</span></td>
+                            <td>Empty shell</td>
+                            <td>None</td>
+                            <td><span class="badge badge-red">Abandoned</span></td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td><strong>Excitable Mike Client Ideas Board</strong></td>
+                            <td>Client-facing ideas board and opportunity tracker for excitable-mike GTM agent workflow. Captures product and market opportunities discovered during consultations.</td>
+                            <td><span class="badge badge-gray">Internal Tool</span></td>
+                            <td>Static HTML (ideas/index.html)</td>
+                            <td>Local only</td>
+                            <td><span class="badge badge-orange">Early Dev &mdash; P3</span></td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td><strong>NUL / Empty Placeholder</strong></td>
+                            <td>Empty directory placeholder in Local Sites. No project content. Reserved for future project.</td>
+                            <td><span class="badge badge-gray">Placeholder</span></td>
+                            <td>N/A</td>
+                            <td>Local only</td>
+                            <td><span class="badge badge-red">Empty</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top:16px;padding:14px;background:#f0f9ff;border-radius:8px;border-left:4px solid #3b82f6;">
+                    <strong>Project Count Breakdown:</strong> 10 active projects with agent systems deployed &middot; 2 placeholder/abandoned shells (no agents) &middot; 1 internal ideas/tools project &middot; 1 empty reserved slot. <strong>Risk flags:</strong> 2 projects on Divi 5.0 beta (Australian Cocoa, Pacific Merchandising), 1 project on WordPress Multisite (WMG Africa). Total Local Sites directories: 14.
+                </div>
+                <div style="margin-top:10px;padding:14px;background:#fef3c7;border-radius:8px;border-left:4px solid #f59e0b;">
+                    <strong>Status Legend:</strong> <span class="badge badge-green">Active</span> &mdash; production-ready &nbsp; <span class="badge badge-orange">Early Dev / Risk</span> &mdash; in development or flagged risk &nbsp; <span class="badge badge-red">Placeholder / Abandoned</span> &mdash; no active development &nbsp; <span class="badge badge-frozen">FROZEN Baseline</span> &mdash; critical files protected
+                </div>
+            </div>
+
+            <!-- AGENT-PROJECT MATRIX -->
+            <div class="section" id="matrix">
+                <div class="section-header">
+                    <h2 class="section-title">Agent-Project Matrix</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('matrix')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-matrix">
+                    <textarea id="textarea-matrix" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-matrix">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('matrix')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('matrix')">Cancel</button>
+                    </div>
+                </div>
+
+                <p style="margin-bottom:12px;color:#555;">
+                    Click an <strong>agent name</strong> (left column) to see which projects it serves.
+                    Click a <strong>project name</strong> (top header) to see all agents assigned to that project.
+                    Hover over dots for tooltip details.
+                </p>
+
+                <div id="matrix-detail" class="matrix-detail">
+                    <h4 id="matrix-detail-title">Selection Detail</h4>
+                    <ul class="matrix-detail-list" id="matrix-detail-list"></ul>
+                </div>
+
+                <div class="matrix-container">
+                    <table class="matrix-table" id="agent-matrix">
+                        <thead>
+                            <tr id="matrix-header-row">
+                                <th>Agent / Project</th>
+                                <!-- project headers injected by JS -->
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-body">
+                            <!-- rows injected by JS -->
+                        </tbody>
+                    </table>
+                    <div class="matrix-legend">
+                        <div class="legend-item"><span class="cell-dot cell-present"></span> Core agent present</div>
+                        <div class="legend-item"><span class="cell-dot cell-domain"></span> Domain-specific agent</div>
+                        <div class="legend-item"><span class="cell-dot cell-variant"></span> Naming variant / inconsistency</div>
+                        <div class="legend-item"><span class="cell-dot cell-na"></span> Not applicable</div>
+                        <div class="legend-item"><span class="cell-dot cell-missing"></span> Missing (gap identified)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFRASTRUCTURE -->
+            <div class="section" id="infrastructure">
+                <div class="section-header">
+                    <h2 class="section-title">Infrastructure Platforms</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('infrastructure')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-infrastructure">
+                    <textarea id="textarea-infrastructure" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-infrastructure">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('infrastructure')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('infrastructure')">Cancel</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Purpose</th>
+                            <th>Projects</th>
+                            <th>Deployment Method</th>
+                            <th>Auth / SSH</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Local by Flywheel</strong></td>
+                            <td>Local development environment for all WordPress projects</td>
+                            <td>All 14 projects</td>
+                            <td>Manual &mdash; all dev work done locally first. No deployment from Local.</td>
+                            <td>N/A (local only)</td>
+                            <td>All sites at <code>C:\Users\teamm\Local Sites\</code>. PHP, MySQL, nginx managed by Local app.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SiteGround</strong></td>
+                            <td>WordPress staging + production hosting</td>
+                            <td>Samurai Framework, My Wine Mojo (WP backend), Plato AI Tutor (WP backend), Australian Cocoa, Sonic Compass, The Kendo Way, Mojo Microsoft AI, Pacific Merchandising, WMG Africa (9 projects total)</td>
+                            <td>rsync via GitHub Actions using <code>webfactory/ssh-agent@v0.9.0</code> + manual rsync</td>
+                            <td>ED25519 SSH keys stored in GitHub secrets. NEVER browser copy-paste keys &mdash; use CLI only.</td>
+                            <td>Port 18765. Secrets: STAGING_SSH_KEY, STAGING_SSH_HOST, STAGING_SSH_USER, STAGING_SSH_PORT, STAGING_DEPLOY_PATH, PROD_DEPLOY_PATH.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vercel</strong></td>
+                            <td>Next.js and React frontend hosting. Zero-config for Next.js projects.</td>
+                            <td>My Wine Mojo (Next.js 15 PWA), Plato AI Tutor (Next.js 15 PWA), Family Orchestrator (Next.js + React 19), Mojo Microsoft AI (frontend)</td>
+                            <td>Auto-deploy on push via GitHub OAuth integration. Instant rollback per deployment.</td>
+                            <td>GitHub OAuth &mdash; no SSH required. Environment variables stored in Vercel dashboard.</td>
+                            <td>Zero-config for Next.js. Instant preview URLs per branch. Edge functions available.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Supabase</strong></td>
+                            <td>PostgreSQL database as a service with built-in auth and real-time</td>
+                            <td>My Wine Mojo (wine log, party feature), Sonic Compass (equipment data), Family Orchestrator (household data)</td>
+                            <td>Direct API calls &mdash; no deployment step needed. Schema migrations via Supabase CLI.</td>
+                            <td>API keys (anon + service_role). Stored in environment variables. Row-level security enabled.</td>
+                            <td>Real-time subscriptions used for MyWineMojo party blind tasting feature. Postgres functions for complex queries.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Azure</strong></td>
+                            <td>Cloud backend services, Azure Functions, and Alexa skill hosting</td>
+                            <td>Family Orchestrator (Alexa + Lambda), Mojo Microsoft AI (Azure Functions), The Kendo Way (planned Azure integration)</td>
+                            <td>Azure Functions: deployment via Azure CLI or GitHub Actions. Alexa: AWS Lambda managed separately.</td>
+                            <td>Service Principal (app registration). Azure CLI configured locally. AWS credentials for Lambda.</td>
+                            <td>Azure Functions pipeline not yet configured for Mojo AI &mdash; flagged as P1 blocker. Alexa uses AWS Lambda (not Azure).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">SSH Key Setup &mdash; Critical Rule</h3>
+                    <p style="margin-bottom:12px;color:#555;">Browser copy-paste corrupts ED25519 keys causing <code>error in libcrypto</code> failures. Always use the CLI:</p>
+                    <div class="code-block">
+# Set SSH key secret via CLI -- NEVER paste through browser
+cat ~/.ssh/your-deploy-key | gh secret set STAGING_SSH_KEY
+
+# Generate a fresh key for each project
+ssh-keygen -t ed25519 -f ~/.ssh/projectname-deploy-key -N "" -C "project-github-actions"
+
+# Recommended GitHub Actions workflow
+- name: Setup SSH
+  uses: webfactory/ssh-agent@v0.9.0
+  with:
+    ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+- name: Deploy via rsync
+  run: |
+    rsync -rlgoDzvc --delete \
+      -e "ssh -p ${{ secrets.STAGING_SSH_PORT }}" \
+      SOURCE_PATH/ \
+      ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}:TARGET_PATH/</div>
+                </div>
+            </div>
+
+            <!-- WORKFLOW & PROCESS -->
+            <div class="section" id="workflow">
+                <div class="section-header">
+                    <h2 class="section-title">Workflow &amp; Process Gates</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('workflow')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-workflow">
+                    <textarea id="textarea-workflow" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-workflow">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('workflow')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('workflow')">Cancel</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Work Type</th>
+                            <th>Required Agent Sequence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>New Feature</strong></td>
+                            <td>delivery-director &rarr; jerry (product scope) &rarr; wp-build-planner &rarr; plan-breaker &rarr; wordpress-dev-builder &rarr; schultz (standards check) &rarr; qa-lead &rarr; devops-manager &rarr; mum (update catalogue)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Architecture / Refactor</strong></td>
+                            <td>delivery-director &rarr; jerry (product impact) &rarr; senior-architect &rarr; plan-breaker &rarr; wp-build-planner &rarr; wordpress-dev-builder &rarr; schultz &rarr; mum</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bug Fix</strong></td>
+                            <td>delivery-director &rarr; wp-build-planner (lightweight) &rarr; wordpress-dev-builder &rarr; schultz &rarr; qa-lead &rarr; mum (if docs changed)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deployment</strong></td>
+                            <td>delivery-director &rarr; devops-manager (with gate checklist) &rarr; mum (log deployment)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Documentation</strong></td>
+                            <td>delivery-director &rarr; docs-scribe &rarr; mum (update catalogue)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security Review</strong></td>
+                            <td>delivery-director &rarr; security-auditor &rarr; devops-manager OR wordpress-dev-builder</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GTM / Market Opportunity</strong></td>
+                            <td>delivery-director &rarr; excitable-mike &rarr; captain-sensible &rarr; scotty-from-marketing &rarr; schultz &rarr; gtm-orchestrator</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Mandatory Gate Rules</h3>
+                    <div class="card-grid-2">
+                        <div class="card" style="border-left-color:#ef4444;">
+                            <h4>Architectural Review Gate</h4>
+                            <p>senior-architect MUST review before implementation when: task involves architecture changes, touches FROZEN baseline files, affects service layer / DB schema / CPT structure, or delivery-director classifies risk as High or Critical.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#f59e0b;">
+                            <h4>Schultz (Governance) Gate</h4>
+                            <p>Schultz MUST review all code before qa-lead. All build plans must pass governance compliance. Security violations are an automatic BLOCK. No skipping this gate.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Deployment Authority</h4>
+                            <p>ONLY devops-manager deploys. No ad-hoc git push to staging/UAT/production. No manual rsync. No deployment without the Deployment Gate Checklist completed.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#8b5cf6;">
+                            <h4>No Direct Code Execution</h4>
+                            <p>The orchestrator (main Claude session) MUST NOT write, edit, or create code files. All implementation delegated to wordpress-dev-builder via the Task tool. No exceptions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENT SYSTEM -->
+            <div class="section" id="agents">
+                <div class="section-header">
+                    <h2 class="section-title">Agent System</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('agents')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-agents">
+                    <textarea id="textarea-agents" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-agents">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('agents')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('agents')">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Core Agents (Deployed in ALL Active Projects)</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Agent</th><th>Role</th><th>Model</th><th>Key Authority</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>delivery-director</code></td><td>Orchestrator, work router</td><td>Haiku</td><td>Routes all work. ONLY agent that sequences other agents.</td></tr>
+                            <tr><td><code>senior-architect</code> (Pete)</td><td>Architecture review gate</td><td>Sonnet</td><td>Must approve P0/P1 architecture decisions before code written.</td></tr>
+                            <tr><td><code>jerry-product-manager</code></td><td>Product scope and UX decisions</td><td>Sonnet</td><td>Validates product fit before build planning. UX and persona decisions.</td></tr>
+                            <tr><td><code>wp-build-planner</code></td><td>Build plan creation</td><td>Sonnet</td><td>Creates feature build plans and tech specs.</td></tr>
+                            <tr><td><code>plan-breaker</code></td><td>Adversarial plan review</td><td>Sonnet</td><td>Finds flaws and risks in plans before implementation.</td></tr>
+                            <tr><td><code>wordpress-dev-builder</code></td><td>Code implementation</td><td>Sonnet</td><td>ONLY agent that writes production code. No shortcuts.</td></tr>
+                            <tr><td><code>qa-lead</code></td><td>Testing and verification</td><td>Sonnet</td><td>Creates test scripts, verifies implementations before deploy.</td></tr>
+                            <tr><td><code>devops-manager</code></td><td>Sole deployment authority</td><td>Sonnet</td><td>ONLY agent that deploys. All platforms. All projects.</td></tr>
+                            <tr><td><code>docs-scribe</code></td><td>Documentation</td><td>Sonnet</td><td>README, API docs, guides. Cannot write code or deploy.</td></tr>
+                            <tr><td><code>schultz</code></td><td>Governance enforcement</td><td>Sonnet</td><td>Standards, naming compliance. Blocks violations.</td></tr>
+                            <tr><td><code>mum-librarian</code></td><td>Document catalogue</td><td>Sonnet</td><td>Registry, audit, organisation of all docs.</td></tr>
+                            <tr><td><code>security-auditor</code></td><td>Security review</td><td>Opus</td><td>Security audits across all projects.</td></tr>
+                            <tr><td><code>the-vision</code></td><td>Group Product Manager (Global)</td><td>Sonnet</td><td>Portfolio oversight, roadmap enforcement, HTML dashboards. Cross-project.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Domain-Specific Agents (By Project)</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Project</th><th>Domain Agents</th><th>Count</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Samurai Framework</strong></td>
+                                <td>excitable-mike, captain-sensible, scotty-from-marketing, gtm-orchestrator, plan-breaker (SF-specific), + domain specialists for each capability area</td>
+                                <td>15+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pacific Merchandising</strong></td>
+                                <td>kanban-specialist, email-processor, order-orchestrator, + 8 others</td>
+                                <td>10+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>My Wine Mojo</strong></td>
+                                <td>Piere-wine-experience-guru (wine domain expert), pwa-specialist, analytics-engineer, + 8 others</td>
+                                <td>10+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sonic Compass</strong></td>
+                                <td>audio-matching-scientist, equipment-curator, + 4 others</td>
+                                <td>5+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>The Kendo Way</strong></td>
+                                <td>kendo-performance-guru, hr-strategy-advisor, + 3 others</td>
+                                <td>4+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mojo Microsoft AI</strong></td>
+                                <td>azure-functions-specialist, ai-readiness-assessor, + 4 others</td>
+                                <td>5+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Australian Cocoa</strong></td>
+                                <td>content-strategist, seo-specialist, ecommerce-advisor, kofi-byte-digital-marketing + 10 others</td>
+                                <td>13 domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Family Orchestrator</strong></td>
+                                <td>lurch-voice-domain-expert, alexa-skills-developer, home-automation-engineer, + 3 others</td>
+                                <td>5+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Plato AI Tutor</strong></td>
+                                <td>ai-tutor-engine, curriculum-designer, + 3 others</td>
+                                <td>4+ domain</td>
+                            </tr>
+                            <tr>
+                                <td><strong>WMG Africa</strong></td>
+                                <td>content-strategist, membership-manager, + 2 others</td>
+                                <td>3+ domain</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-banner" style="margin-top:16px;">
+                    <strong>Gap Alert &mdash; Agent Naming Inconsistency (P1):</strong> 3 projects (MyWineMojo, Sonic Compass, Plato) mix kebab-case, snake_case, and camelCase agent names. Standard is kebab-case only (e.g., <code>wine-analyst</code> not <code>wine_analyst</code>). Remediation: AGENT-NAMING-STANDARDIZATION.md. Owner: delivery-director + schultz.
+                </div>
+            </div>
+
+            <!-- CODE WRITING PROTOCOL -->
+            <div class="section" id="code-protocol">
+                <div class="section-header">
+                    <h2 class="section-title">Code Writing Protocol</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('code-protocol')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-code-protocol">
+                    <textarea id="textarea-code-protocol" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-code-protocol">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('code-protocol')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('code-protocol')">Cancel</button>
+                    </div>
+                </div>
+
+                <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:14px;border-radius:6px;margin-bottom:20px;">
+                    <strong>Status: Defined here &mdash; Rollout in progress (from 2026-03-02 Audit)</strong><br>
+                    Standard defined in this section. CODE-WRITING-PROTOCOL.md to be published by docs-scribe. Schultz gate activated for all new PRs. Owner: docs-scribe + schultz.
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Golden Rules</h3>
+                    <div class="card-grid">
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 1: Every Function Has a One-Liner</h4>
+                            <p>Every function or method must have a clear, plain-English one-liner comment explaining what it does. No jargon. Write it so a new developer or AI agent understands it in 5 seconds.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 2: Every Logical Block Has Context</h4>
+                            <p>Every logical code block (if-chain, loop, DB query, API call) must have a comment explaining WHAT it does AND WHY that decision was made. Not just the what &mdash; the why matters most.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 3: No Assumed Knowledge</h4>
+                            <p>Comments must be self-contained. Do not assume the reader has read external docs, ADRs, or Slack history. Every file must make sense in isolation. Reference baseline or ADR names if relevant.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 4: AI-Agent Readable</h4>
+                            <p>AI agents read this code to implement features. Comments must be precise enough that an AI agent can correctly extend or modify the code without consulting external docs. If an AI gets confused, the comment failed.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 5: Docblocks for Every Public Method</h4>
+                            <p>Every public PHP method needs a full PHPDoc block (@param, @return, @since, @throws). Every exported TypeScript function needs a JSDoc block. Private methods need at minimum a one-liner.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Rule 6: Schultz Enforcement Gate</h4>
+                            <p>Schultz checks code documentation before qa-lead. Missing one-liners or undocumented WHY decisions = automatic block. This is enforced, not optional.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">PHP / WordPress &mdash; Before and After</h3>
+                    <div class="code-pair">
+                        <div>
+                            <span class="code-label code-label-bad">BAD &mdash; No context, no why</span>
+                            <div class="code-block code-bad">function get_order_items( $order_id ) {
+    global $wpdb;
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM wp_sf_order_items
+             WHERE order_id = %d",
+            $order_id
+        )
+    );
+    return $results;
+}</div>
+                        </div>
+                        <div>
+                            <span class="code-label code-label-good">GOOD &mdash; One-liner, why explained</span>
+                            <div class="code-block code-good">/**
+ * Fetch all line items for a given order.
+ *
+ * Uses a raw query instead of WP_Query because sf_order_item
+ * is a custom table (not a CPT) -- WP_Query cannot reach it.
+ * See baseline: core-domain-model-and-services.md
+ *
+ * @param int $order_id  Post ID of the sf_order CPT.
+ * @return array         Raw row objects; empty array if none.
+ * @since 0.2.0
+ */
+function get_order_items( int $order_id ): array {
+    global $wpdb;
+
+    // Prepare prevents SQL injection -- $order_id cast to int
+    // but prepare() is still required by our security baseline.
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM wp_sf_order_items
+             WHERE order_id = %d",
+            $order_id
+        )
+    );
+
+    // Return empty array (not null/false) so callers can
+    // always safely iterate without a null check.
+    return $results ?: [];
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">TypeScript / React &mdash; Before and After</h3>
+                    <div class="code-pair">
+                        <div>
+                            <span class="code-label code-label-bad">BAD &mdash; No context, magic numbers</span>
+                            <div class="code-block code-bad">export function scoreWine(reactions: string[]): number {
+    const weights: Record&lt;string, number&gt; = {
+        love: 3, like: 2, meh: 1, dislike: 0,
+    };
+    const total = reactions.reduce(
+        (sum, r) =&gt; sum + (weights[r] ?? 0), 0
+    );
+    return Math.min(100, (total / reactions.length) * 33);
+}</div>
+                        </div>
+                        <div>
+                            <span class="code-label code-label-good">GOOD &mdash; Purpose and weights explained</span>
+                            <div class="code-block code-good">/**
+ * Calculate a 0-100 preference score from emoji reactions.
+ *
+ * The 4-face reaction system (love/like/meh/dislike) maps to
+ * weighted points. Weights chosen in product spec 2026-02-10
+ * to give 'love' 3x the influence of 'like' -- strong positives
+ * should dominate the matching algorithm.
+ *
+ * @param reactions - Array of reaction strings from wine log.
+ * @returns         - Score 0-100. Higher = stronger preference.
+ */
+export function scoreWine(reactions: string[]): number {
+    // Weight map: love=3, like=2, meh=1, dislike=0
+    // Decided in MyWineMojo product spec 2026-02-10.
+    const weights: Record&lt;string, number&gt; = {
+        love: 3, like: 2, meh: 1, dislike: 0,
+    };
+
+    // Sum the weights; unknown reactions default to 0.
+    const total = reactions.reduce(
+        (sum, r) =&gt; sum + (weights[r] ?? 0), 0
+    );
+
+    // Multiply by 33 to scale 0-3 range to ~0-100,
+    // then clamp so pure 'love' array does not exceed 100.
+    return Math.min(100, (total / reactions.length) * 33);
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Enforcement Workflow</h3>
+                    <div class="code-block" style="background:#1e293b;">
+PR SUBMITTED
+    |
+    v
+wordpress-dev-builder writes code
+    |
+    v
+Schultz gate checks:
+  [?] Every function has a one-liner?
+  [?] Every logical block has WHY comment?
+  [?] PHPDoc / JSDoc blocks present?
+  [?] No assumed knowledge (self-contained)?
+  [?] AI-agent readable?
+    |
+    |-- ALL PASS --&gt; qa-lead handoff --&gt; devops-manager --&gt; DEPLOYED
+    |
+    +-- ANY FAIL --&gt; BLOCKED --&gt; wordpress-dev-builder revises
+                                  --&gt; Back to Schultz gate</div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">4-Week Rollout Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot">W1</div>
+                            <div class="timeline-content">
+                                <h5>Week 1 &mdash; Release Standard and Apply to New Code</h5>
+                                <p>Publish CODE-WRITING-PROTOCOL.md. All new code written from this day forward must follow the protocol. Schultz gate activated for new PRs. Existing code not yet required to comply.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">W2</div>
+                            <div class="timeline-content">
+                                <h5>Weeks 2&ndash;4 &mdash; Refactored Code Must Comply</h5>
+                                <p>Any file touched during a refactor or bug fix must be brought up to protocol standard before merging. Schultz rejects PRs that touch old code without adding required comments.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">W5</div>
+                            <div class="timeline-content">
+                                <h5>Weeks 5&ndash;12 &mdash; Legacy Code Commented When Touched</h5>
+                                <p>Every time a legacy file is touched for any reason, the developer or AI agent must add protocol-compliant comments to functions they interact with. Progressive improvement, not big-bang rewrite.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background:#10b981;">QA</div>
+                            <div class="timeline-content">
+                                <h5>Ongoing &mdash; Quarterly Compliance Audits</h5>
+                                <p>mum-librarian runs a quarterly documentation audit. Reports compliance percentage per project. Schultz uses the report to prioritise which legacy files to target next. Target: 80%+ compliance by end of quarter.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GOVERNANCE & BASELINES -->
+            <div class="section" id="governance">
+                <div class="section-header">
+                    <h2 class="section-title">Governance &amp; Baselines</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('governance')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-governance">
+                    <textarea id="textarea-governance" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-governance">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('governance')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('governance')">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Frozen Baselines &mdash; Samurai Framework</h3>
+                    <p style="margin-bottom:12px;color:#555;">Critical code is FROZEN. Cannot be modified without explicit baseline change process: identify baseline by name, restate Behaviour Guaranteed, get explicit approval.</p>
+                    <table>
+                        <thead>
+                            <tr><th>Baseline</th><th>Frozen Date</th><th>Files</th><th>Key Files</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Core Services v1.0</strong></td>
+                                <td>2026-01-30</td>
+                                <td>6 files</td>
+                                <td>class-sf-order-service.php, class-sf-order-item-service.php, class-sf-approvals-service.php, class-sf-order-approvals-service.php, class-sf-service-loader.php, class-sf-order-item-status-catalog.php</td>
+                                <td><span class="badge badge-frozen">FROZEN</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kanban v1.0</strong></td>
+                                <td>2026-02-03</td>
+                                <td>5 files</td>
+                                <td>Kanban capability files &mdash; board, card, drag-drop, status tracking</td>
+                                <td><span class="badge badge-frozen">FROZEN</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email Intelligence v1.2</strong></td>
+                                <td>2026-02-18</td>
+                                <td>11 files</td>
+                                <td>class-sf-email-ai-service.php, class-sf-email-credentials-manager.php, class-sf-email-import-service.php, class-sf-email-ingestion-service.php, class-sf-email-matching-service.php, class-sf-email-notification-service.php, class-sf-email-quote-service.php + 4 more</td>
+                                <td><span class="badge badge-frozen">FROZEN</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>MYOB Integration v1.0</strong></td>
+                                <td>2026-02-05</td>
+                                <td>5 files</td>
+                                <td>class-sf-myob-service.php, class-sf-myob-client.php, class-sf-myob-token-manager.php, class-sf-myob-rate-limiter.php, myob-invitation-helpers.php</td>
+                                <td><span class="badge badge-frozen">FROZEN</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>CRM v1.0</strong></td>
+                                <td>2026-03-02</td>
+                                <td>13 files</td>
+                                <td>CRM Contacts capability &mdash; class-sf-crm-contact.php, class-sf-crm-service.php, class-sf-contact-matching-service.php + 10 supporting files. Branch: feature/email-order-manager context.</td>
+                                <td><span class="badge badge-frozen">FROZEN</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Baseline Status by Project</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Project</th><th>Baselines</th><th>Status</th><th>Risk</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Samurai Framework</strong></td>
+                                <td>5 frozen baselines (Core Services, Kanban, Email Intelligence, MYOB, CRM)</td>
+                                <td><span class="badge badge-green">Protected</span></td>
+                                <td>Low</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pacific Merchandising</strong></td>
+                                <td>None &mdash; in progress (Week 2 of rollout)</td>
+                                <td><span class="badge badge-orange">In Progress</span></td>
+                                <td>Medium &mdash; silent breaking changes possible until baseline established</td>
+                            </tr>
+                            <tr>
+                                <td><strong>MyWineMojo</strong></td>
+                                <td>None</td>
+                                <td><span class="badge badge-red">No baseline</span></td>
+                                <td>High</td>
+                            </tr>
+                            <tr>
+                                <td><strong>WMG Africa</strong></td>
+                                <td>None (pinned to SF v0.2.1)</td>
+                                <td><span class="badge badge-orange">Pinned only</span></td>
+                                <td>Medium &mdash; pinned version limits risk but no formal rollback mechanism</td>
+                            </tr>
+                            <tr>
+                                <td><strong>The Kendo Way</strong></td>
+                                <td>None (pinned to SF v0.2.1)</td>
+                                <td><span class="badge badge-orange">Pinned only</span></td>
+                                <td>Medium</td>
+                            </tr>
+                            <tr>
+                                <td><strong>All other 8 projects</strong></td>
+                                <td>None</td>
+                                <td><span class="badge badge-red">No baseline</span></td>
+                                <td>High &mdash; P0 Gap: extend baseline system to all active projects</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:12px;border-radius:6px;margin-top:12px;">
+                        <strong>P0 Critical Gap:</strong> Only Samurai Framework has Baseline Freeze System. 13 other projects have no protection against silent breaking changes. Remediation: senior-architect to identify 3-5 critical files per project and document behavior guarantees. See BASELINE-FREEZE-ROLLOUT-PLAN.md (to be created).
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Baseline Rollout Schedule</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Week</th><th>Project</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Now</td><td>Samurai Framework</td><td><span class="badge badge-green">Complete &mdash; 5 baselines frozen</span></td></tr>
+                            <tr><td>Week 2</td><td>Pacific Merchandising</td><td>senior-architect identifies 3-5 critical files, documents Behaviour Guaranteed</td></tr>
+                            <tr><td>Week 3</td><td>MyWineMojo, Sonic Compass</td><td>Baseline declaration for core service and data layers</td></tr>
+                            <tr><td>Week 4</td><td>The Kendo Way, Mojo Microsoft AI</td><td>Baseline declaration for core integration files</td></tr>
+                            <tr><td>Weeks 5-6</td><td>Remaining active projects</td><td>Australian Cocoa, Family Orchestrator, Plato AI Tutor, WMG Africa</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Samurai Framework Capabilities</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Capability</th><th>Status</th><th>Files</th><th>Baseline</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Kanban Board</strong></td><td><span class="badge badge-frozen">FROZEN v1.0</span></td><td>5</td><td>Frozen 2026-02-03</td></tr>
+                            <tr><td><strong>Order Management</strong></td><td><span class="badge badge-frozen">FROZEN Core</span></td><td>6</td><td>Frozen 2026-01-30</td></tr>
+                            <tr><td><strong>Email Intelligence</strong></td><td><span class="badge badge-frozen">FROZEN v1.2</span></td><td>11</td><td>Frozen 2026-02-18</td></tr>
+                            <tr><td><strong>MYOB Integration</strong></td><td><span class="badge badge-frozen">FROZEN v1.0</span></td><td>5</td><td>Frozen 2026-02-05</td></tr>
+                            <tr><td><strong>CRM (Contacts)</strong></td><td><span class="badge badge-frozen">FROZEN v1.0</span></td><td>13</td><td>Frozen 2026-03-02</td></tr>
+                            <tr><td><strong>Brand Management</strong></td><td><span class="badge badge-green">Active</span></td><td>4</td><td>None</td></tr>
+                            <tr><td><strong>Portal System</strong></td><td><span class="badge badge-green">Active</span></td><td>6</td><td>None</td></tr>
+                            <tr><td><strong>Marketing Planner</strong></td><td><span class="badge badge-green">Active</span></td><td>8</td><td>None</td></tr>
+                            <tr><td><strong>Program Detail View</strong></td><td><span class="badge badge-green">Active</span></td><td>6</td><td>None</td></tr>
+                            <tr><td><strong>Email Order Manager</strong></td><td><span class="badge badge-orange">In Development</span></td><td>3+</td><td>None (branch: feature/email-order-manager)</td></tr>
+                            <tr><td><strong>Job Request System</strong></td><td><span class="badge badge-green">Active</span></td><td>4</td><td>None</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">ADR Index</h3>
+                    <p style="color:#555;margin-bottom:12px;">Architecture Decision Records are stored in <code>.claude/decisions/</code> per project. Key decision areas:</p>
+                    <div class="card-grid-2">
+                        <div class="card">
+                            <h4>Samurai Framework ADRs</h4>
+                            <p>Three-layer architecture (Capability/Service/Domain), Service returns true|WP_Error pattern, Singleton capability pattern, Baseline Freeze process, Shortcode Registry mandate, Multi-tenancy via sf_org_id, CRM contact model, Email Intelligence AI matching strategy.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Cross-Project ADRs</h4>
+                            <p>Agent naming convention (kebab-case only), Deployment via devops-manager only, No file deletion (archive only), Canonical prompt template, SSH key management via CLI only, Code writing protocol (this document), Baseline freeze extension to all projects.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Cross-Project Capabilities Discovered</h3>
+                    <div class="card-grid-2">
+                        <div class="card" style="border-left-color:#8b5cf6;">
+                            <h4>Sensory Compass (Sonic Compass V2)</h4>
+                            <p>Major architectural upgrade to Sonic Compass. Listening Chain Visualizer, FR Graph Translator, Room Analyzer (public), genre-optimised gear matching. V2 architecture rebuild underway. Blocker: Spotify API not accepting new apps. Audio radar charts and tier lists planned.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#8b5cf6;">
+                            <h4>Social Wine Features (MyWineMojo Phase 5)</h4>
+                            <p>Wine Party blind tasting with collective real-time results via Supabase subscriptions, QR party invitations, party archive. Party MVP in Phase 3. Social and sharing features planned for Phase 5 roadmap.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#8b5cf6;">
+                            <h4>Kendo Governance App (PWA)</h4>
+                            <p>Standalone PWA governance application within The Kendo Way project. Board governance, strategic planning dashboards and people analytics. Deployed at separate governance-app path. Azure integration planned.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#8b5cf6;">
+                            <h4>AI Order Linking (Samurai Framework)</h4>
+                            <p>Email-to-Order AI matching system. Incoming emails intelligently linked to existing orders via AI matching service. Part of Email Order Manager feature currently in development on feature/email-order-manager branch.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARCHITECTURE -->
+            <div class="section" id="architecture">
+                <div class="section-header">
+                    <h2 class="section-title">Architecture</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('architecture')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-architecture">
+                    <textarea id="textarea-architecture" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-architecture">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('architecture')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('architecture')">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Samurai Framework &mdash; Three-Layer Architecture</h3>
+                    <div class="card-grid">
+                        <div class="card" style="border-left-color:#667eea;">
+                            <h4>Layer 1: Capability Layer</h4>
+                            <p><code>Capabilities/</code> &mdash; Feature modules using singleton pattern. Each registers CPTs, taxonomies, shortcodes and admin UI. Examples: Kanban, Order, Portal, Brand, CRM, EmailIntelligence, MYOB, MarketingPlanner.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#764ba2;">
+                            <h4>Layer 2: Service Layer</h4>
+                            <p><code>includes/Services/</code> &mdash; Business logic with static methods. Pattern: validate &rarr; check permissions &rarr; sanitize &rarr; write. Returns <code>true|WP_Error</code>. Never fatal. No <code>die()</code>, <code>exit()</code>, or <code>wp_die()</code>.</p>
+                        </div>
+                        <div class="card" style="border-left-color:#10b981;">
+                            <h4>Layer 3: Domain Layer</h4>
+                            <p><code>includes/Domain/</code> &mdash; Status catalogs as single source of truth. Never hardcode status values &mdash; always consume from <code>SF_Order_Item_Status_Catalog</code> or <code>SF_Order_Status_Catalog</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Bootstrap Flow</h3>
+                    <div class="code-block">samurai-framework.php
+    --&gt; plugins_loaded hook
+    --&gt; SF_Framework::instance()
+    --&gt; loads all capabilities (singleton pattern)
+    --&gt; registers admin menu
+    --&gt; enqueues assets (via wp_enqueue_script / wp_enqueue_style)
+    --&gt; ACF field groups sync from Data-Structures/ JSON files</div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Multi-Tenancy Model</h3>
+                    <div class="card-grid-2">
+                        <div class="card">
+                            <h4>Tenant Structure</h4>
+                            <p>Organizations (<code>sf_org</code> CPT) are the top-level tenant. Users linked via <code>sf_org_id</code> user_meta. Boards, brands, and portals scoped via <code>_sf_board_org_id</code> post_meta. All queries filter by org ID.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Custom Post Types</h4>
+                            <p>sf_org, sf_brand, sf_brand_asset, sf_order, sf_order_item, sf_board, sf_kanban_card, sf_program, sf_marketing_calendar, sf_marketing_planner, sf_new_job_request, sf_contact (CRM)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Naming and Code Conventions</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Element</th><th>Convention</th><th>Example</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Class prefix</td><td><code>SF_</code></td><td><code>SF_Order_Service</code></td></tr>
+                            <tr><td>File naming</td><td>lowercase, hyphenated</td><td><code>class-sf-order-service.php</code></td></tr>
+                            <tr><td>Methods</td><td>snake_case</td><td><code>get_item_status()</code></td></tr>
+                            <tr><td>Constants</td><td>UPPERCASE_SNAKE</td><td><code>SF_VERSION</code></td></tr>
+                            <tr><td>Meta keys</td><td><code>_sf_</code> prefix</td><td><code>_sf_board_org_id</code></td></tr>
+                            <tr><td>Agent names</td><td>kebab-case</td><td><code>delivery-director</code></td></tr>
+                            <tr><td>Error handling</td><td>Return WP_Error</td><td>Never fatal, never wp_die()</td></tr>
+                            <tr><td>Singleton pattern</td><td>All capability classes</td><td><code>SF_Kanban::instance()</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- KEY CONCEPTS -->
+            <div class="section" id="concepts">
+                <div class="section-header">
+                    <h2 class="section-title">Key Concepts</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('concepts')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-concepts">
+                    <textarea id="textarea-concepts" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-concepts">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('concepts')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('concepts')">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>Master Blaster Protocol</h4>
+                        <p>Every response begins with a status header: "Master Blaster 'Samurai Framework' is asking [Agent] to [action]". Provides full transparency on which agent is acting and why. Non-negotiable for all responses.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Fail-Closed Authentication</h4>
+                        <p>Assume users are NOT authenticated unless proven otherwise. Always check <code>is_user_logged_in()</code> before showing protected content. Default to deny. Never trust client-side data.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Service Return Pattern</h4>
+                        <p>All service methods return <code>true|WP_Error</code>. Never fatal errors. No <code>die()</code>, <code>exit()</code>, or <code>wp_die()</code> in service layer. Callers decide how to handle errors.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Archive Not Delete</h4>
+                        <p>Files are NEVER deleted. Move to <code>.claude/archive/</code> with an <code>_ARCHIVED.md</code> companion file documenting original path, date, reason, and approval. No exceptions.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Shortcode Registry</h4>
+                        <p>Query the registry before using ANY shortcode: <code>GET /wp-json/shortcode-registry/v1/shortcodes</code>. Never assume a shortcode exists. Never invent attributes. See <code>docs/shortcode-registry-QUICKREF.md</code>.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Canonical Precedence</h4>
+                        <p>When instructions conflict: Design Lock &gt; Architecture docs &gt; Known-Good Baselines &gt; AI-Human Working Rules &gt; AI Operating Instructions &gt; Existing code &gt; AI suggestions.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Feature Registry</h4>
+                        <p>Consult <code>.claude/FEATURE-REGISTRY.md</code> before working on any feature. It maps: Branches &rarr; Roadmap &rarr; Build Plans &rarr; User Journeys &rarr; Research &rarr; Code. Always check before starting work.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Status Catalogs</h4>
+                        <p>Never hardcode status option arrays. Always consume from <code>SF_Order_Item_Status_Catalog</code> or <code>SF_Order_Status_Catalog</code>. These are the single source of truth for domain status values.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Baseline Change Process</h4>
+                        <p>To modify a FROZEN file: identify baseline by name, restate the Behaviour Guaranteed, get explicit approval. Breaking changes require marking baseline as SUPERSEDED and creating a new baseline declaration.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM OF WORK - SKILLS, MEMORIES, PROCESSES, PATTERNS -->
+            <div class="section" id="system-of-work">
+                <div class="section-header">
+                    <h2 class="section-title">System of Work: Skills, Memories & Patterns 🔴 ACTIVE</h2>
+                    <button class="comment-button" onclick="toggleCommentBox('system-of-work')">Add Comment</button>
+                </div>
+                <div class="inline-comment-box" id="comment-system-of-work">
+                    <textarea id="textarea-system-of-work" placeholder="Add your comment or improvement..."></textarea>
+                    <div class="inline-comment-controls">
+                        <select class="comment-input-priority" id="priority-system-of-work">
+                            <option value="P2">Medium (P2)</option>
+                            <option value="P0">Critical (P0)</option>
+                            <option value="P1">High (P1)</option>
+                            <option value="P3">Low (P3)</option>
+                        </select>
+                        <button class="btn-submit-comment" onclick="submitComment('system-of-work')">Submit</button>
+                        <button class="btn-cancel-comment" onclick="toggleCommentBox('system-of-work')">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="info-banner">
+                    <strong>🎯 Current Initiative:</strong> Building unified system to track and manage Skills (reusable utilities), Memories (persistent knowledge), Processes (workflows), and Patterns (best practices) across all projects and agents.
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Foundation Documents (CREATED ✅)</h3>
+                    <p style="margin-bottom: 12px;">Three key documents have been created to establish the framework:</p>
+                    <div class="card-grid-2">
+                        <div class="card">
+                            <h4>📋 SKILLS-STRATEGY.md</h4>
+                            <p><strong>What it is:</strong> Architecture and design principles for Claude Code skills. Explains what skills are, how they differ from agents, and how to create them.</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;"><code>~/.claude/SKILLS-STRATEGY.md</code></p>
+                        </div>
+                        <div class="card">
+                            <h4>📊 CAPABILITY-INVENTORY.md</h4>
+                            <p><strong>What it is:</strong> Comprehensive inventory tracking skills, memories, processes, and patterns. Current status table with active/needed/planned badges.</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;"><code>~/.claude/CAPABILITY-INVENTORY.md</code></p>
+                        </div>
+                        <div class="card">
+                            <h4>🎯 AGENT-SKILLS-MAPPING.md</h4>
+                            <p><strong>What it is:</strong> Maps each agent group to their required skills. Includes priority phases (P1-P4) and effort estimates for skill creation.</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;"><code>~/.claude/AGENT-SKILLS-MAPPING.md</code></p>
+                        </div>
+                        <div class="card">
+                            <h4>✅ ACTION LIST (This Document)</h4>
+                            <p><strong>What it is:</strong> Implementation roadmap with prioritized tasks, checklists, and timelines for building the system.</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;"><code>~/.claude/SYSTEM-OF-WORK-ACTION-LIST.md</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Skills Implementation Status</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Skills</th>
+                                <th>Status</th>
+                                <th>Owner</th>
+                                <th>Timeline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Phase 1</strong><br/>(Immediate)</td>
+                                <td>/deploy<br/>/fix-issue<br/>/build-plan-create<br/>/architecture-review</td>
+                                <td><span class="badge badge-red">NOT STARTED</span></td>
+                                <td>You</td>
+                                <td>This week</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 2</strong><br/>(High Priority)</td>
+                                <td>/test-validate<br/>/security-audit<br/>/standards-check<br/>/pr-summary</td>
+                                <td><span class="badge badge-orange">PLANNED</span></td>
+                                <td>You/Agents</td>
+                                <td>Next week</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 3</strong><br/>(Medium)</td>
+                                <td>/user-journey-map<br/>/explain-code<br/>/bug-triage<br/>/risk-assess<br/>(6 more)</td>
+                                <td><span class="badge badge-orange">PLANNED</span></td>
+                                <td>Agents</td>
+                                <td>Week 3</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 4</strong><br/>(Polish)</td>
+                                <td>All remaining skills<br/>(10+ skills)</td>
+                                <td><span class="badge badge-gray">BACKLOG</span></td>
+                                <td>Agents</td>
+                                <td>Ongoing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Quick Start: What Are Skills?</h3>
+                    <table>
+                        <tr>
+                            <td><strong>Agent</strong></td>
+                            <td>A specialized AI role with a specific persona (e.g., "Pete" = architect, "Dave" = M365 specialist)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Skill</strong></td>
+                            <td>A reusable utility command invoked via <code>/skill-name</code>. NOT agent-specific — any agent or user can use it.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Memory</strong></td>
+                            <td>Persistent knowledge stored in project memory files (e.g., <code>MEMORY.md</code>). Agent-specific, project-scoped.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Process</strong></td>
+                            <td>Repeatable workflow sequences documented in agent prompts or CLAUDE.md (e.g., "New Feature Workflow")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pattern</strong></td>
+                            <td>Best practices and conventions (naming, architecture, code style) enforced across projects.</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">How Skills Work</h3>
+                    <div style="background: #f9fafb; border-left: 4px solid #667eea; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+                        <p><strong>Storage:</strong> Skills live in <code>~/.claude/skills/&lt;skill-name&gt;/SKILL.md</code> (global) or <code>./.claude/skills/&lt;skill-name&gt;/SKILL.md</code> (project-level)</p>
+                        <p style="margin-top: 8px;"><strong>Invocation:</strong> User types <code>/skill-name</code> or Claude auto-invokes based on description match</p>
+                        <p style="margin-top: 8px;"><strong>Isolation:</strong> Optional <code>context: fork</code> runs skill in isolated subagent to protect main context</p>
+                        <p style="margin-top: 8px;"><strong>Safety:</strong> Use <code>disable-model-invocation: true</code> for high-risk operations (deploy, git push)</p>
+                        <p style="margin-top: 8px;"><strong>Tools:</strong> Can restrict to specific tools via <code>allowed-tools</code> parameter</p>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Agent Groups & Their Skills</h3>
+                    <div class="card-grid">
+                        <div class="card" style="border-left-color: #667eea;">
+                            <h4>1. Delivery & Orchestration</h4>
+                            <p><strong>delivery-director:</strong> /debug, /batch, /workflow-validate</p>
+                        </div>
+                        <div class="card" style="border-left-color: #764ba2;">
+                            <h4>2. Architecture</h4>
+                            <p><strong>Pete:</strong> /architecture-review, /design-pattern-check, /refactor-plan</p>
+                        </div>
+                        <div class="card" style="border-left-color: #10b981;">
+                            <h4>3. Product & UX</h4>
+                            <p><strong>jerry:</strong> /user-journey-map, /ux-validate, /scope-estimate</p>
+                        </div>
+                        <div class="card" style="border-left-color: #f59e0b;">
+                            <h4>4. Build Planning</h4>
+                            <p><strong>wp-build-planner:</strong> /build-plan-create, /risk-assess, /test-strategy</p>
+                        </div>
+                        <div class="card" style="border-left-color: #ef4444;">
+                            <h4>5. Implementation</h4>
+                            <p><strong>wordpress-dev-builder:</strong> /fix-issue, /code-style-check, /test-write</p>
+                        </div>
+                        <div class="card" style="border-left-color: #06b6d4;">
+                            <h4>6. Quality & Testing</h4>
+                            <p><strong>qa-lead:</strong> /test-validate, /pr-summary, /regression-check</p>
+                        </div>
+                        <div class="card" style="border-left-color: #8b5cf6;">
+                            <h4>7. Deployment</h4>
+                            <p><strong>devops-manager:</strong> /deploy, /deployment-verify, /rollback</p>
+                        </div>
+                        <div class="card" style="border-left-color: #ec4899;">
+                            <h4>8. Security</h4>
+                            <p><strong>security-auditor:</strong> /security-audit, /vuln-scan, /threat-model</p>
+                        </div>
+                        <div class="card" style="border-left-color: #14b8a6;">
+                            <h4>9. Documentation</h4>
+                            <p><strong>docs-scribe:</strong> /doc-create, /api-doc-gen, /explain-code</p>
+                        </div>
+                        <div class="card" style="border-left-color: #06b6d4;">
+                            <h4>10. Governance</h4>
+                            <p><strong>schultz:</strong> /standards-check, /naming-validate, /pattern-enforce</p>
+                        </div>
+                        <div class="card" style="border-left-color: #a855f7;">
+                            <h4>11. Library & Knowledge</h4>
+                            <p><strong>mum:</strong> /catalogue-update, /doc-deprecate, /knowledge-index</p>
+                        </div>
+                        <div class="card" style="border-left-color: #f97316;">
+                            <h4>12. Domain Specialists</h4>
+                            <p><strong>Dave & Dr Dynamics:</strong> /m365-api-validate, /dynamics-validate, /integration-test</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Implementation Checklist</h3>
+                    <p style="margin-bottom: 12px;"><strong>Phase 1 Tasks (Complete One by One):</strong></p>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+                        <p><strong>1. /deploy</strong> — Deployment with Gate Checklist</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 4px;">Owner: devops-manager | Status: 📋 Not Started | Effort: Medium (4-6 hrs)</p>
+                    </div>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+                        <p><strong>2. /fix-issue</strong> — GitHub Issue Fixing with Standards</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 4px;">Owner: wordpress-dev-builder | Status: 📋 Not Started | Effort: Small (2-3 hrs)</p>
+                    </div>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+                        <p><strong>3. /build-plan-create</strong> — Generate 40-Step Build Plans</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 4px;">Owner: wp-build-planner | Status: 📋 Not Started | Effort: Large (6-8 hrs)</p>
+                    </div>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px;">
+                        <p><strong>4. /architecture-review</strong> — Formal Architecture Assessment</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 4px;">Owner: Pete-senior-architect | Status: 📋 Not Started | Effort: Large (6-8 hrs)</p>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Related Resources</h3>
+                    <p style="margin-bottom: 12px;">All documents are stored in <code>~/.claude/</code> and are version-controlled:</p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>SKILLS-STRATEGY.md</strong> — Skills architecture, design principles, how to create skills</li>
+                        <li><strong>CAPABILITY-INVENTORY.md</strong> — Master inventory of skills, memories, processes, patterns with status</li>
+                        <li><strong>AGENT-SKILLS-MAPPING.md</strong> — Which agents get which skills, priority phases, effort estimates</li>
+                        <li><strong>SYSTEM-OF-WORK-ACTION-LIST.md</strong> — Implementation roadmap with checklists and timeline</li>
+                        <li><strong>KNOWLEDGE-BASE-POLICY.md</strong> — Rules for recording decisions, patterns, lessons learned</li>
+                        <li><strong>PROJECT-DIRECTORY.md</strong> — Project metadata (ports, databases, hosts)</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3 class="subsection-title">Success Criteria</h3>
+                    <table>
+                        <tr>
+                            <td><strong>Foundation (This Week)</strong></td>
+                            <td>All Phase 1 skills created &middot; Tested with respective agents &middot; Dashboard reflects progress</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quality (Next Week)</strong></td>
+                            <td>All Phase 2 skills created &middot; Memory system active &middot; Pattern documentation started</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Completion (Month 1)</strong></td>
+                            <td>All planned skills created &middot; Memory files in 3+ projects &middot; Pattern library established</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 6px; margin-top: 20px;">
+                    <strong>📌 Next Action:</strong> Start Phase 1 skill creation. Begin with <code>/deploy</code> (critical for devops-manager). Follow the template in SKILLS-STRATEGY.md. Reference AGENT-SKILLS-MAPPING.md for requirements.
+                </div>
+
+            </div>
+
+        </div><!-- /content -->
+
+        <!-- COMMENTS PANEL -->
+        <div class="comments-panel">
+            <h3>Comments <span class="comment-count" id="comment-counter">0</span></h3>
+            <div id="comments-list">
+                <p style="color:#999;font-size:0.88em;">No comments yet. Click "Add Comment" on any section to get started.</p>
+            </div>
+        </div>
+
+    </div><!-- /main-layout -->
+
+    <div class="footer">
+        <p><strong>Samurai Framework &mdash; Interactive System of Work</strong></p>
+        <p style="margin-top:8px;font-size:0.88em;color:#999;">Last rebuilt 2026-03-03 (Phase 3) by wordpress-dev-builder. 14 projects, 170+ agents, 5 platforms, 5 frozen baselines.</p>
+        <p style="margin-top:6px;font-size:0.88em;">Add comments directly on the page &mdash; they persist in your browser. Use "View All Comments" to export for review.</p>
+    </div>
+
+</div><!-- /container -->
+
+<!-- VIEW ALL COMMENTS MODAL -->
+<div id="commentsModal" class="modal">
+    <div class="modal-content">
+        <h2>All Comments</h2>
+        <p style="margin-bottom:16px;color:#666;">Copy and paste into a message to Claude for review:</p>
+        <div class="raw-comments" id="rawCommentsList"></div>
+        <div style="margin-top:20px;display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================================================================
+// COMMENT SYSTEM -- local storage persistence
+// ================================================================
+let comments = JSON.parse(localStorage.getItem('samuraiSowComments')) || {};
+
+function toggleCommentBox(sectionId) {
+    const box = document.getElementById('comment-' + sectionId);
+    if (box) box.classList.toggle('active');
+}
+
+function submitComment(sectionId) {
+    const textarea = document.getElementById('textarea-' + sectionId);
+    const priorityEl = document.getElementById('priority-' + sectionId);
+    if (!textarea || !priorityEl) return;
+
+    const text = textarea.value.trim();
+    if (!text) { alert('Please enter a comment.'); return; }
+
+    if (!comments[sectionId]) comments[sectionId] = [];
+    comments[sectionId].push({
+        text: text,
+        priority: priorityEl.value,
+        timestamp: new Date().toLocaleString(),
+        id: Date.now()
+    });
+
+    localStorage.setItem('samuraiSowComments', JSON.stringify(comments));
+    textarea.value = '';
+    toggleCommentBox(sectionId);
+    renderCommentsPanel();
+    updateCommentButton(sectionId);
+}
+
+function deleteComment(sectionId, commentId) {
+    if (!comments[sectionId]) return;
+    comments[sectionId] = comments[sectionId].filter(c => c.id !== commentId);
+    if (comments[sectionId].length === 0) delete comments[sectionId];
+    localStorage.setItem('samuraiSowComments', JSON.stringify(comments));
+    renderCommentsPanel();
+    updateCommentButton(sectionId);
+}
+
+function updateCommentButton(sectionId) {
+    const btn = document.querySelector('[onclick="toggleCommentBox(\'' + sectionId + '\')"]');
+    if (!btn) return;
+    const count = (comments[sectionId] || []).length;
+    if (count > 0) {
+        btn.classList.add('has-comments');
+        btn.textContent = count + ' Comment' + (count > 1 ? 's' : '');
+    } else {
+        btn.classList.remove('has-comments');
+        btn.textContent = 'Add Comment';
+    }
+}
+
+function renderCommentsPanel() {
+    const list = document.getElementById('comments-list');
+    const counter = document.getElementById('comment-counter');
+    let total = 0;
+    let html = '';
+
+    for (const [sectionId, sectionComments] of Object.entries(comments)) {
+        sectionComments.forEach(comment => {
+            total++;
+            const pc = comment.priority.toLowerCase();
+            html += '<div class="comment-item ' + pc + '">' +
+                '<div class="comment-header">' +
+                '<span class="comment-section">' + sectionId.toUpperCase().replace(/-/g,' ') + '</span>' +
+                '<span class="comment-priority ' + comment.priority + '">' + comment.priority + '</span>' +
+                '<button class="comment-delete" onclick="deleteComment(\'' + sectionId + '\',' + comment.id + ')" title="Delete">x</button>' +
+                '</div>' +
+                '<div class="comment-text">' + escapeHtml(comment.text) + '</div>' +
+                '<div class="comment-timestamp">' + comment.timestamp + '</div>' +
+                '</div>';
+        });
+    }
+
+    counter.textContent = total;
+    list.innerHTML = total === 0
+        ? '<p style="color:#999;font-size:0.88em;">No comments yet. Click "Add Comment" on any section to get started.</p>'
+        : html;
+}
+
+function showAllComments() {
+    let output = 'SAMURAI FRAMEWORK - SYSTEM OF WORK COMMENTS\n';
+    output += '='.repeat(60) + '\n\n';
+    let has = false;
+    for (const [sid, sc] of Object.entries(comments)) {
+        sc.forEach(c => {
+            has = true;
+            output += '[' + c.priority + '] ' + sid.toUpperCase() + '\n';
+            output += 'Timestamp: ' + c.timestamp + '\n';
+            output += '-'.repeat(60) + '\n';
+            output += c.text + '\n\n';
+            output += '-'.repeat(60) + '\n\n';
+        });
+    }
+    if (!has) output += 'No comments added yet.\n';
+    document.getElementById('rawCommentsList').textContent = output;
+    document.getElementById('commentsModal').classList.add('active');
+}
+
+function exportComments() { showAllComments(); }
+
+function closeModal() {
+    document.getElementById('commentsModal').classList.remove('active');
+}
+
+function copyToClipboard() {
+    const text = document.getElementById('rawCommentsList').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Comments copied to clipboard!');
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('Comments copied to clipboard!');
+    });
+}
+
+function clearAllComments() {
+    if (confirm('Delete all comments? This cannot be undone.')) {
+        comments = {};
+        localStorage.removeItem('samuraiSowComments');
+        renderCommentsPanel();
+        document.querySelectorAll('.comment-button').forEach(btn => {
+            btn.classList.remove('has-comments');
+            btn.textContent = 'Add Comment';
+        });
+    }
+}
+
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+// Close modal on outside click
+window.onclick = function(e) {
+    const m = document.getElementById('commentsModal');
+    if (e.target === m) m.classList.remove('active');
+};
+
+// ================================================================
+// AGENT-PROJECT MATRIX -- 14 projects x 35+ agents
+// ================================================================
+
+// Project column definitions (14 projects) — ordered by spec: canonical first, then by activity/priority
+const PROJECTS = [
+    { key: 'sf',        label: 'Samurai FW',    fullName: 'Samurai Framework' },
+    { key: 'alexa',     label: 'Fam. Orch.',    fullName: 'Family Orchestrator' },
+    { key: 'mwm',       label: 'Wine Mojo',     fullName: 'My Wine Mojo' },
+    { key: 'plato',     label: 'Plato Tutor',   fullName: 'Plato AI Tutor' },
+    { key: 'cocoa',     label: 'Aus. Cocoa',    fullName: 'Australian Cocoa' },
+    { key: 'sonic',     label: 'Sonic Compass', fullName: 'Sonic Compass' },
+    { key: 'kendo',     label: 'Kendo Way',     fullName: 'The Kendo Way' },
+    { key: 'mmai',      label: 'Mojo MS AI',    fullName: 'Mojo Microsoft AI' },
+    { key: 'pac',       label: 'Pacific Merch', fullName: 'Pacific Merchandising' },
+    { key: 'wmg',       label: 'WMG Africa',    fullName: 'WMG Africa' },
+    { key: 'itrust',    label: 'iTrust v2',     fullName: 'iTrust Invest v2' },
+    { key: 'plato2',    label: 'Plato (shell)', fullName: 'Plato AI (abandoned)' },
+    { key: 'mikeboard', label: 'Mike Board',    fullName: 'Excitable Mike Board' },
+    { key: 'nul',       label: 'NUL / Empty',   fullName: 'Empty Placeholder' },
+];
+
+// Cell value constants
+const P  = 'present';   // core agent present
+const D  = 'domain';    // domain-specific present
+const V  = 'variant';   // naming variant / inconsistency
+const NA = 'na';        // not applicable
+const M  = 'missing';   // expected but missing
+
+// Agent rows: [group, agentName, description, ...14 project cells]
+// Column order: SF, FamOrch, WineMojo, Plato, AusCocoa, Sonic, Kendo, MojoAI, Pacific, WMG, iTrust, Plato2, MikeBoard, NUL
+const AGENTS = [
+    // ---------------------------------------------------------------
+    // CORE AGENTS — deployed in all 10 active projects
+    // ---------------------------------------------------------------
+    ['Core Agents', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    // Col:                                                          SF   Fam  MWM  Pla  Coa  Son  Ken  MAI  Pac  WMG  iTr  Pl2  Mke  NUL
+    ['', 'delivery-director',       'Routes all work, sequences agents',             P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'senior-architect',        'Architecture review gate (Pete)',               P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'jerry-product-manager',   'Product scope and UX decisions',               P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'wp-build-planner',        'Build plan creation',                          P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'plan-breaker',            'Adversarial plan review',                      P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'wordpress-dev-builder',   'Only writes production code (Komang)',         P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'qa-lead',                 'Testing and verification (Nina)',              P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'devops-manager',          'Sole deployment authority',                    P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'docs-scribe',             'Documentation',                                P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'schultz',                 'Governance and standards enforcement',         P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'mum-librarian',           'Document catalogue management',                P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'security-auditor',        'Security review (Opus model)',                 P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+    ['', 'the-vision',              'Group Product Manager — portfolio oversight',  P,   P,   P,   P,   P,   P,   P,   P,   P,   P,   NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // GTM AGENTS — Samurai Framework and cross-project
+    // ---------------------------------------------------------------
+    ['GTM Agents', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'excitable-mike',          'Market opportunity evaluation (GTM)',          D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'captain-sensible',        'GTM risk assessment and pragmatism',           D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'scotty-from-marketing',   'Marketing strategy and messaging',             D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'gtm-orchestrator',        'Go-to-market coordination gate',               D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // FAMILY ORCHESTRATOR DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Family Orchestrator', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'lurch-voice-domain-expert','Alexa and voice UX domain expert',           NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'alexa-skills-developer',  'Alexa Skills Kit integration specialist',     NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'home-automation-engineer','Smart home logic and presence detection',      NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // MY WINE MOJO DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['My Wine Mojo', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'Piere-wine-experience-guru','Wine domain and experience design (Piere)',  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'pwa-specialist',          'Progressive Web App architecture',             NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'analytics-engineer',      'Customer data pipeline and analytics',         NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'wine_analyst',            'NAMING GAP: should be wine-analyst (kebab)',   NA,  NA,  V,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // PLATO AI TUTOR DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Plato AI Tutor', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'ai-tutor-engine',         'Socratic tutoring AI logic (Socrates)',        NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'curriculum-designer',     'Learning path and subject modules',            NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'plato-ai-trainer',        'NAMING GAP: conflicts with ai_trainer',        NA,  NA,  NA,  V,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // AUSTRALIAN COCOA DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Australian Cocoa', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'content-strategist',      'Content planning and SEO strategy',            NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'seo-specialist',          'Search engine optimisation',                   NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'ecommerce-advisor',       'E-commerce and conversion optimisation',       NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'kofi-byte-digital-marketing','Digital marketing strategy',                NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // SONIC COMPASS DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Sonic Compass', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'audio-matching-scientist','Audio gear matching logic (jojo)',             NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'equipment-curator',       'Equipment review and data curation',           NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'sonic-v2-matching-scientist','NAMING GAP: v2 variant naming conflict',    NA,  NA,  NA,  NA,  NA,  V,   NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // THE KENDO WAY DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['The Kendo Way', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'kendo-performance-guru',  'HR and performance domain logic',              NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'hr-strategy-advisor',     'Talent development and board governance',      NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // MOJO MICROSOFT AI DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Mojo Microsoft AI', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'azure-functions-specialist','Azure Functions and cloud logic (Dave)',     NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'ai-readiness-assessor',   'AI maturity and Copilot scoring engine',       NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA],
+    ['', 'm365-specialist',         'Microsoft 365 integration (Dr Dynamics)',      NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // PACIFIC MERCHANDISING DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['Pacific Merchandising', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'kanban-specialist',       'Kanban board and card logic',                  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA],
+    ['', 'email-processor',         'Email parsing for orders',                     NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA],
+    ['', 'order-orchestrator',      'Order and merchandise workflow management',    NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA],
+    ['', 'merchandising-expert',    'Merchandising domain rules and processes',     NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA,  NA],
+
+    // ---------------------------------------------------------------
+    // WMG AFRICA DOMAIN AGENTS
+    // ---------------------------------------------------------------
+    ['WMG Africa', null, null, null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    ['', 'wmg-content-strategist',  'WMG content strategy and positioning',        NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA],
+    ['', 'membership-manager',      'Membership and access management',             NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  NA,  D,   NA,  NA,  NA,  NA],
+];
+
+function buildMatrix() {
+    const headerRow = document.getElementById('matrix-header-row');
+    const tbody = document.getElementById('matrix-body');
+    if (!headerRow || !tbody) return;
+
+    // Build project headers
+    PROJECTS.forEach((p, i) => {
+        const th = document.createElement('th');
+        th.textContent = p.label;
+        th.title = 'Click to see all agents for: ' + p.fullName;
+        th.dataset.projIdx = i;
+        th.addEventListener('click', () => showProjectDetail(i));
+        headerRow.appendChild(th);
+    });
+
+    // Build rows
+    AGENTS.forEach(row => {
+        const tr = document.createElement('tr');
+
+        if (row[1] === null) {
+            // Group header row -- spans all columns
+            const td = document.createElement('td');
+            td.colSpan = PROJECTS.length + 1;
+            td.className = 'group-header';
+            td.textContent = row[0];
+            tr.appendChild(td);
+        } else {
+            // Agent row -- name cell + one cell per project
+            const agentName = row[1];
+            const desc = row[2];
+
+            const nameTd = document.createElement('td');
+            nameTd.className = 'agent-name-cell';
+            nameTd.textContent = agentName;
+            nameTd.title = desc + ' -- click to see projects';
+            nameTd.addEventListener('click', () => showAgentDetail(agentName, desc, row.slice(3)));
+            tr.appendChild(nameTd);
+
+            // Cell values start at index 3
+            for (let i = 0; i < PROJECTS.length; i++) {
+                const val = row[3 + i];
+                const td = document.createElement('td');
+                td.className = 'cell';
+                const dot = document.createElement('span');
+                dot.className = 'cell-dot cell-' + val;
+                dot.title = getCellTitle(val, agentName, PROJECTS[i].label);
+                td.appendChild(dot);
+                tr.appendChild(td);
+            }
+        }
+
+        tbody.appendChild(tr);
+    });
+}
+
+function getCellTitle(val, agent, project) {
+    if (val === P)  return agent + ' is deployed as a core agent in ' + project;
+    if (val === D)  return agent + ' is a domain-specific agent for ' + project;
+    if (val === V)  return agent + ' has a naming inconsistency in ' + project + ' -- needs standardisation';
+    if (val === NA) return agent + ' is not applicable to ' + project;
+    if (val === M)  return agent + ' is MISSING from ' + project + ' -- gap identified';
+    return '';
+}
+
+function showAgentDetail(agentName, desc, cells) {
+    const panel = document.getElementById('matrix-detail');
+    const title = document.getElementById('matrix-detail-title');
+    const list  = document.getElementById('matrix-detail-list');
+
+    title.textContent = 'Agent: ' + agentName;
+    let html = '<li style="padding:6px 0;color:#667eea;font-style:italic;">' + escapeHtml(desc) + '</li>';
+
+    PROJECTS.forEach((p, i) => {
+        const val = cells[i];
+        let label = '';
+        if (val === P)  label = 'Core agent -- deployed in this project';
+        if (val === D)  label = 'Domain-specific agent';
+        if (val === V)  label = 'Naming inconsistency -- needs fixing';
+        if (val === NA) label = 'Not applicable';
+        if (val === M)  label = 'MISSING -- gap identified';
+        if (val !== NA) {
+            html += '<li><strong>' + p.label + '</strong> -- ' + label + '</li>';
+        }
+    });
+
+    list.innerHTML = html;
+    panel.classList.add('active');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showProjectDetail(projIdx) {
+    const panel = document.getElementById('matrix-detail');
+    const title = document.getElementById('matrix-detail-title');
+    const list  = document.getElementById('matrix-detail-list');
+    const proj  = PROJECTS[projIdx];
+
+    title.textContent = 'Project: ' + proj.fullName + ' -- Assigned Agents';
+    let html = '';
+    let count = 0;
+
+    AGENTS.forEach(row => {
+        if (row[1] === null) return; // skip group headers
+        const val = row[3 + projIdx];
+        if (val === P || val === D || val === V) {
+            count++;
+            const tag = val === P ? '<span class="badge badge-green">core</span>'
+                      : val === D ? '<span class="badge badge-blue">domain</span>'
+                      : '<span class="badge badge-orange">variant</span>';
+            html += '<li><strong>' + row[1] + '</strong> ' + tag + ' -- ' + row[2] + '</li>';
+        }
+    });
+
+    list.innerHTML = html || '<li>No agents assigned (placeholder/empty project).</li>';
+    title.textContent += ' (' + count + ' agents)';
+    panel.classList.add('active');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ================================================================
+// INITIALISE ON LOAD
+// ================================================================
+window.addEventListener('load', () => {
+    buildMatrix();
+    renderCommentsPanel();
+    Object.keys(comments).forEach(sid => updateCommentButton(sid));
+});
+</script>
+</body>
+</html>

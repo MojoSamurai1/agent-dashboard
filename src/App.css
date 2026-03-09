@@ -49,3 +49,21 @@
 .logout-btn:hover {
   background: #ff5252;
 }
+
+.header-links {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.nav-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95em;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #764ba2;
+}

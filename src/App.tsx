@@ -48,9 +48,14 @@ function App() {
           <header className="app-header">
             <div className="header-content">
               <h1>🤖 Agent Dashboard</h1>
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
+              <div className="header-links">
+                <a href="/dashboard/system-of-work.html" target="_blank" rel="noopener noreferrer" className="nav-link">
+                  📋 System of Work
+                </a>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
             </div>
           </header>
           <Routes>
